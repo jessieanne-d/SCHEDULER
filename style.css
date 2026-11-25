@@ -1,0 +1,678 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --ink: #1e293b;
+    --cream: #fffbeb;
+    --cream-2: #fef3c7;
+    --red: #ef4444;
+    --red-dark: #b91c1c;
+    --green: #22c55e;
+    --green-dark: #15803d;
+    --yellow: #facc15;
+    --sky-top: #2563eb;
+    --sky-mid: #60a5fa;
+    --sky-low: #bae6fd;
+}
+
+body {
+    font-family: "Space Grotesk", sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 58%, var(--sky-low) 100%);
+    overflow-x: hidden;
+    padding-bottom: 72px;
+}
+
+.pixel-font {
+    font-family: "Press Start 2P", monospace;
+}
+
+.silk-font {
+    font-family: "Silkscreen", monospace;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ==========================================
+   ☁️ OVERWORLD SCENERY & ANIMATIONS
+   ========================================== */
+.world-backdrop {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.mario-cloud {
+    position: absolute;
+    background: #ffffff;
+    border: 4px solid var(--ink);
+    border-radius: 999px;
+    box-shadow: inset 0 -6px 0 #dbeafe;
+    animation: driftCloud 46s linear infinite;
+}
+
+.mario-cloud::before,
+.mario-cloud::after {
+    content: "";
+    position: absolute;
+    background: #ffffff;
+    border-top: 4px solid var(--ink);
+    border-radius: 50%;
+}
+
+.cloud-a { width: 128px; height: 42px; top: 56px; left: -140px; animation-duration: 40s; }
+.cloud-a::before { width: 52px; height: 52px; top: -24px; left: 18px; }
+.cloud-a::after { width: 40px; height: 40px; top: -16px; left: 64px; }
+
+.cloud-b { width: 156px; height: 48px; top: 175px; left: 28%; animation-duration: 54s; }
+.cloud-b::before { width: 62px; height: 62px; top: -28px; left: 22px; }
+.cloud-b::after { width: 46px; height: 46px; top: -20px; left: 78px; }
+
+.cloud-c { width: 112px; height: 36px; top: 310px; left: 72%; animation-duration: 48s; }
+.cloud-c::before { width: 44px; height: 44px; top: -20px; left: 16px; }
+
+@keyframes driftCloud {
+    0% { transform: translateX(-20vw); }
+    100% { transform: translateX(125vw); }
+}
+
+.overworld-hill {
+    position: absolute;
+    bottom: 34px;
+    background: #16a34a;
+    border: 4px solid var(--ink);
+    border-radius: 55% 55% 0 0;
+    box-shadow: inset 12px 10px 0 #4ade80;
+}
+
+.hill-1 { width: 280px; height: 145px; left: -25px; }
+.hill-2 { width: 230px; height: 112px; right: 16px; }
+
+.overworld-ground {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 36px;
+    background: repeating-linear-gradient(
+        90deg,
+        #c2410c 0px,
+        #c2410c 36px,
+        #7c2d12 36px,
+        #7c2d12 40px
+    );
+    border-top: 7px solid #22c55e;
+}
+
+@keyframes floatBob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+@keyframes spinCoin {
+    0%, 100% { transform: scaleX(1); }
+    50% { transform: scaleX(0.25); }
+}
+
+@keyframes slideInStage {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================
+   🎮 LAYOUT & HUD
+   ========================================== */
+.app-shell {
+    position: relative;
+    z-index: 1;
+    max-width: 1180px;
+    margin: 20px auto 0 auto;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    animation: slideInStage 0.28s ease-out;
+}
+
+.hud-bar {
+    background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+    border: 4px solid var(--ink);
+    border-radius: 16px;
+    padding: 16px 20px;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    box-shadow: 0 7px 0 var(--ink);
+}
+
+.hud-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.q-badge {
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(180deg, #fde047 0%, #f59e0b 100%);
+    border: 4px solid var(--ink);
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    color: var(--ink);
+    font-family: "Press Start 2P", monospace;
+    font-size: 1.35rem;
+    box-shadow: inset 3px 3px 0 #fef9c3, 0 4px 0 var(--ink);
+    animation: floatBob 1.5s infinite ease-in-out;
+}
+
+.hud-title {
+    font-family: "Press Start 2P", monospace;
+    font-size: 1.05rem;
+    text-shadow: 3px 3px 0 var(--ink);
+    line-height: 1.35;
+}
+
+.hud-subtitle {
+    font-family: "Silkscreen", monospace;
+    font-size: 0.78rem;
+    color: #fef08a;
+    margin-top: 4px;
+}
+
+.hud-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.hud-chip {
+    background: #0f172a;
+    color: #facc15;
+    border: 3px solid var(--yellow);
+    border-radius: 10px;
+    padding: 7px 12px;
+    font-family: "Silkscreen", monospace;
+    font-size: 0.78rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.coin-spinner {
+    display: inline-block;
+    animation: spinCoin 1.5s infinite linear;
+}
+
+.mario-panel {
+    position: relative;
+    background: var(--cream);
+    border: 4px solid var(--ink);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: inset 0 4px 0 #ffffff, 0 7px 0 var(--ink);
+}
+
+.panel-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 3px dashed #cbd5e1;
+}
+
+.stage-tag {
+    background: var(--green);
+    color: #fff;
+    border: 3px solid var(--ink);
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-family: "Press Start 2P", monospace;
+    font-size: 0.62rem;
+    box-shadow: 0 3px 0 var(--ink);
+}
+
+.btn {
+    font-family: "Silkscreen", monospace;
+    font-weight: 700;
+    font-size: 0.78rem;
+    border: 3px solid var(--ink);
+    border-radius: 10px;
+    padding: 8px 14px;
+    cursor: pointer;
+    background: #e2e8f0;
+    color: var(--ink);
+    box-shadow: 0 4px 0 var(--ink);
+    transition: transform 0.08s ease, filter 0.12s ease;
+}
+
+.btn:hover { filter: brightness(1.05); }
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-green { background: var(--green); color: #fff; text-shadow: 1px 1px 0 var(--green-dark); }
+.btn-yellow { background: var(--yellow); color: var(--ink); }
+.btn-red { background: var(--red); color: #fff; text-shadow: 1px 1px 0 var(--red-dark); }
+.btn-blue { background: #38bdf8; color: var(--ink); }
+.btn-lg { padding: 13px 18px; font-size: 0.88rem; }
+
+/* ==========================================
+   🔐 LOGIN SCREEN
+   ========================================== */
+.login-wrapper {
+    min-height: calc(100vh - 130px);
+    display: grid;
+    place-items: center;
+    padding: 12px;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 470px;
+    background: var(--cream);
+    border: 4px solid var(--ink);
+    border-radius: 18px;
+    padding: 26px 24px;
+    box-shadow: inset 0 4px 0 #ffffff, 0 10px 0 var(--ink);
+    animation: slideInStage 0.3s ease-out;
+}
+
+.login-banner {
+    background: var(--red);
+    color: #fff;
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 0 var(--ink);
+}
+
+.login-banner h2 {
+    font-family: "Press Start 2P", monospace;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    text-shadow: 2px 2px 0 var(--ink);
+}
+
+.form-field {
+    margin-bottom: 14px;
+}
+
+.form-field label {
+    display: block;
+    font-family: "Silkscreen", monospace;
+    font-size: 0.78rem;
+    margin-bottom: 6px;
+}
+
+.form-field input,
+select,
+input[type="number"],
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 3px solid var(--ink);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--ink);
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.form-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 2px solid #dc2626;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+/* ==========================================
+   🗺️ DASHBOARD & 8 STAGE CARDS
+   ========================================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+@media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .stats-grid { grid-template-columns: 1fr; } }
+
+.stat-card {
+    background: var(--cream-2);
+    border: 4px solid var(--ink);
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 5px 0 var(--ink);
+}
+
+.stat-card .label {
+    font-family: "Silkscreen", monospace;
+    font-size: 0.7rem;
+    color: #475569;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.stat-card .value {
+    font-family: "Press Start 2P", monospace;
+    font-size: 1.05rem;
+    color: #dc2626;
+}
+
+.stages-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+@media (max-width: 1024px) { .stages-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .stages-grid { grid-template-columns: 1fr; } }
+
+.stage-card {
+    background: #ffffff;
+    border: 4px solid var(--ink);
+    border-radius: 14px;
+    padding: 14px;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    box-shadow: 0 5px 0 var(--ink);
+    transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.stage-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 0 var(--ink);
+}
+
+.stage-card.active-stage {
+    background: #fef9c3;
+    outline: 3px solid var(--red);
+}
+
+.stage-banner {
+    border: 3px solid var(--ink);
+    border-radius: 10px;
+    padding: 8px 10px;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "Silkscreen", monospace;
+    font-size: 0.74rem;
+    text-shadow: 1px 1px 0 var(--ink);
+}
+
+.stage-title {
+    font-family: "Silkscreen", monospace;
+    font-size: 0.88rem;
+    color: var(--ink);
+}
+
+.stage-sub {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #475569;
+}
+
+/* ==========================================
+   📋 INVENTORY INPUT TABLE & CALCULATOR
+   ========================================== */
+.toolbar-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.table-scroll {
+    overflow-x: auto;
+    border: 4px solid var(--ink);
+    border-radius: 12px;
+    background: #fff;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 0 var(--ink);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+th, td {
+    border-bottom: 2px solid #e2e8f0;
+    padding: 10px 8px;
+    text-align: center;
+}
+
+th {
+    background: var(--ink);
+    color: var(--yellow);
+    font-family: "Silkscreen", monospace;
+    font-size: 0.75rem;
+}
+
+.config-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px;
+    background: var(--cream-2);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 14px;
+}
+
+.mlfq-config {
+    margin: 0 0 16px;
+    padding: 14px;
+    background: var(--cream-2);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+}
+.mlfq-config > h3 { margin: 0 0 12px; }
+.mlfq-config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.mlfq-config-card { min-width: 0; display: grid; gap: 7px; padding: 12px; border: 2px solid #334155; border-radius: 10px; }
+.mlfq-config-card legend { padding: 0 6px; font-weight: 700; }
+.mlfq-config-card label { font-size: 0.78rem; font-weight: 700; }
+.mlfq-config-card input, .mlfq-config-card select { width: 100%; min-width: 0; }
+.mlfq-config-card input:disabled { opacity: 0.65; cursor: not-allowed; }
+.mlfq-config-note { margin: 12px 2px 0; font-size: 0.82rem; color: #475569; }
+
+.action-cta-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 640px) { .action-cta-row { grid-template-columns: 1fr; } }
+
+.warp-transition {
+    background: #0f172a;
+    color: #facc15;
+    border: 4px solid var(--yellow);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-family: "Press Start 2P", monospace;
+    font-size: 0.72rem;
+    text-align: center;
+    margin-top: 12px;
+    animation: floatBob 0.7s infinite ease-in-out;
+}
+
+/* ==========================================
+   📊 MARIO GANTT CHART & COMPARISON BARS
+   ========================================== */
+.gantt-box {
+    overflow-x: auto;
+    padding: 18px 12px 36px 12px;
+    background: #f8fafc;
+    border: 4px solid var(--ink);
+    border-radius: 12px;
+    margin-bottom: 16px;
+}
+
+.gantt-track {
+    display: flex;
+    align-items: center;
+    min-width: max-content;
+}
+
+.gantt-seg {
+    position: relative;
+    height: 68px;
+    border: 3px solid var(--ink);
+    border-radius: 8px;
+    margin-right: 4px;
+    padding: 4px 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-family: "Silkscreen", monospace;
+    font-weight: 700;
+    font-size: 0.84rem;
+    box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.35), 0 4px 0 var(--ink);
+}
+
+.gantt-seg.idle-seg {
+    background: repeating-linear-gradient(
+        -45deg,
+        #cbd5e1,
+        #cbd5e1 10px,
+        #94a3b8 10px,
+        #94a3b8 20px
+    );
+    color: var(--ink);
+}
+
+.mlfq-timelines {
+    margin: 18px 0 20px;
+    padding: 18px;
+    background: #0f172a;
+    color: #e2e8f0;
+    border: 2px solid #334155;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.mlfq-timelines-title {
+    margin: 0 0 6px;
+    font-family: "Silkscreen", monospace;
+    font-size: 1rem;
+}
+
+.mlfq-timelines-note { margin: 0 0 16px; color: #94a3b8; font-size: 0.88rem; }
+.mlfq-timeline-row { padding: 14px 0 18px; border-top: 1px solid #334155; }
+.mlfq-row-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px 14px; margin-bottom: 10px; }
+.mlfq-row-heading strong { font-size: 1.05rem; }
+.mlfq-row-heading span, .mlfq-row-heading small { color: #aebbd0; }
+.mlfq-row-heading small { flex-basis: 100%; font-size: 0.82rem; }
+.mlfq-lane-scroll { overflow-x: auto; padding: 3px 2px 32px; }
+.mlfq-lane-track { height: 66px; position: relative; background: #1e293b; border: 1px solid #475569; }
+.mlfq-lane-block { position: absolute; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; border-right: 2px solid #0f172a; text-align: center; }
+.mlfq-lane-block.is-process { color: white; font-weight: 700; }
+.mlfq-lane-block.is-idle { background: #1e293b; color: #94a3b8; }
+.mlfq-lane-block span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding: 0 3px; }
+.mlfq-lane-block small { font-size: 0.68rem; opacity: 0.9; }
+.mlfq-lane-block:focus-visible { outline: 3px solid #facc15; outline-offset: -3px; z-index: 1; }
+.mlfq-time-axis { position: relative; height: 23px; }
+.mlfq-time-tick { position: absolute; top: 5px; transform: translateX(-50%); color: #cbd5e1; font: 0.68rem "Press Start 2P", monospace; }
+.mlfq-time-tick::before { content: ""; position: absolute; height: 7px; border-left: 1px solid #64748b; left: 50%; bottom: 100%; }
+
+.preempt-mark {
+    position: absolute;
+    top: -11px;
+    right: -6px;
+    background: #ef4444;
+    color: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 1px 5px;
+    font-family: "Press Start 2P", monospace;
+    font-size: 0.5rem;
+}
+
+.t-mark-start,
+.t-mark-end {
+    position: absolute;
+    bottom: -25px;
+    font-family: "Press Start 2P", monospace;
+    font-size: 0.68rem;
+    color: var(--ink);
+}
+
+.t-mark-start { left: 0; }
+.t-mark-end { right: 0; }
+
+.flag-pole {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 12px;
+    font-size: 1.8rem;
+}
+
+.flag-pole span {
+    font-family: "Press Start 2P", monospace;
+    font-size: 0.55rem;
+    background: var(--green);
+    color: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    padding: 3px 6px;
+    margin-top: 2px;
+}
+
+.champ-bar-track {
+    width: 100%;
+    height: 16px;
+    background: #e2e8f0;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.champ-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #facc15);
+    transition: width 0.35s ease;
+}
+
+.celebrate-banner {
+    background: linear-gradient(90deg, #fef08a, #bbf7d0);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-family: "Silkscreen", monospace;
+    font-size: 0.82rem;
+    margin-bottom: 14px;
+    animation: floatBob 1.8s infinite ease-in-out;
+}

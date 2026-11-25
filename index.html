@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Mario OS // CPU Scheduling Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Animated Overworld Scenery -->
+    <div class="world-backdrop" aria-hidden="true">
+        <div class="mario-cloud cloud-a"></div>
+        <div class="mario-cloud cloud-b"></div>
+        <div class="mario-cloud cloud-c"></div>
+        <div class="overworld-hill hill-1"></div>
+        <div class="overworld-hill hill-2"></div>
+        <div class="overworld-ground"></div>
+    </div>
+
+    <!-- ==========================================
+         🔐 1. LOGIN SCREEN
+         ========================================== -->
+    <div id="login-screen" class="app-shell">
+        <header class="hud-bar">
+            <div class="hud-brand">
+                <div class="q-badge">?</div>
+                <div>
+                    <h1 class="hud-title">SUPER MARIO OS</h1>
+                    <p class="hud-subtitle">CPU SCHEDULING SIMULATOR • 8 ALGORITHMS</p>
+                </div>
+            </div>
+            <div class="hud-actions">
+                <button type="button" id="login-sound-btn" class="btn" onclick="toggleSound()">🔇 SOUND: OFF</button>
+            </div>
+        </header>
+
+        <div class="login-wrapper">
+            <form class="login-card" onsubmit="handleLogin(event)">
+                <div class="login-banner">
+                    <h2>🍄 PLAYER SELECT & WORLD LOGIN</h2>
+                </div>
+
+                <div class="form-field">
+                    <label for="login-username">PLAYER USERNAME</label>
+                    <input type="text" id="login-username" value="Mario" placeholder="Enter player name">
+                </div>
+
+                <div class="form-field">
+                    <label for="login-password">STAGE PASSCODE</label>
+                    <input type="password" id="login-password" value="1-1" placeholder="Enter passcode">
+                </div>
+
+                <div id="login-error" class="form-error hidden"></div>
+
+                <button type="submit" class="btn btn-green btn-lg" style="width: 100%;">
+                    ▶ START GAME / LOGIN
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         🗺️ 2. MAIN SIMULATOR DASHBOARD
+         ========================================== -->
+    <div id="simulator-screen" class="app-shell hidden">
+        <!-- Top HUD -->
+        <header class="hud-bar">
+            <div class="hud-brand">
+                <div class="q-badge">?</div>
+                <div>
+                    <h1 class="hud-title">SUPER MARIO WORLD // CPU SCHEDULER</h1>
+                    <p id="hud-player-info" class="hud-subtitle">PLAYER: MARIO • WORLD 1-1 (Mushroom Kingdom Stage)</p>
+                </div>
+            </div>
+
+            <div class="hud-actions">
+                <span class="hud-chip">
+                    <span class="coin-spinner">🪙</span>
+                    PROCESS COINS: <strong id="hud-coin-count">4</strong>
+                </span>
+                <button type="button" id="sound-toggle-btn" class="btn" onclick="toggleSound()">🔇 SOUND: OFF</button>
+                <button type="button" class="btn btn-red" onclick="handleLogout()">LOGOUT</button>
+            </div>
+        </header>
+
+        <!-- Dashboard Overview Stats -->
+        <section class="mario-panel">
+            <div class="panel-top">
+                <span class="stage-tag">WORLD MAP</span>
+                <h2 id="welcome-heading" class="silk-font">WELCOME BACK, MARIO!</h2>
+                <button type="button" class="btn btn-blue" onclick="exportResultsCSV()">⬇ EXPORT CSV</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="label">🪙 COLLECTED PROCESS COINS</span>
+                    <div id="dash-coins" class="value">4</div>
+                </div>
+                <div class="stat-card">
+                    <span class="label">⏱ AVG WAITING TIME</span>
+                    <div id="dash-wt" class="value">0.00</div>
+                </div>
+                <div class="stat-card">
+                    <span class="label">🚩 AVG TURNAROUND TIME</span>
+                    <div id="dash-tat" class="value">0.00</div>
+                </div>
+                <div class="stat-card">
+                    <span class="label">⭐ CPU UTILIZATION</span>
+                    <div id="dash-util" class="value">0.0%</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8 Game-World Stages -->
+        <section class="mario-panel">
+            <div class="panel-top">
+                <span class="stage-tag">8 STAGES</span>
+                <h2 class="silk-font">SELECT ALGORITHM WORLD STAGE</h2>
+            </div>
+            <div id="stages-grid" class="stages-grid"></div>
+        </section>
+
+        <!-- Process Inventory & Calculator Panel -->
+        <section class="mario-panel">
+            <div class="panel-top">
+                <span id="calc-stage-tag" class="stage-tag">WORLD 1-1</span>
+                <h2 id="calc-stage-title" class="silk-font">First-Come, First-Served (FCFS) — Mushroom Kingdom Stage</h2>
+                <div class="toolbar-row">
+                    <button type="button" class="btn btn-green" onclick="addProcessRow()">+ ADD PROCESS</button>
+                    <button type="button" class="btn btn-yellow" onclick="generateSampleData()">🎲 GENERATE SAMPLE DATA</button>
+                    <button type="button" class="btn btn-red" onclick="clearAllProcesses()">🗑 CLEAR ALL</button>
+                </div>
+            </div>
+
+            <p id="stage-description" style="margin-bottom: 12px; font-weight: 600;"></p>
+
+            <!-- Algorithm & Quantum / Queue Parameters -->
+            <div class="config-strip">
+                <div>
+                    <label class="silk-font" style="display: block; font-size: 0.75rem; margin-bottom: 4px;">ACTIVE STAGE</label>
+                    <select id="algorithm-select" onchange="selectStage(this.value)"></select>
+                </div>
+
+                <div id="param-rr-box" class="hidden">
+                    <label id="rr-quantum-label" for="rr-quantum" class="silk-font" style="display: block; font-size: 0.75rem; margin-bottom: 4px;">ROUND ROBIN TIME QUANTUM</label>
+                    <input type="number" id="rr-quantum" min="1" value="2" onchange="recomputeIfVisible()">
+                </div>
+
+            </div>
+
+            <section id="mlq-config" class="mlfq-config hidden" aria-label="MLQ queue configuration">
+                <h3 class="silk-font">MLQ QUEUE CONFIGURATION</h3>
+                <div class="mlfq-config-grid">
+                    <div class="mlfq-config-card">
+                        <label for="mlq-queue-count">Number of queues</label>
+                        <select id="mlq-queue-count" onchange="setMlqQueueCount(this.value)"><option value="1">1 queue</option><option value="2" selected>2 queues</option><option value="3">3 queues</option><option value="4">4 queues</option><option value="5">5 queues</option><option value="6">6 queues</option><option value="7">7 queues</option><option value="8">8 queues</option></select>
+                        <label for="mlq-priority-rule">Priority convention</label>
+                        <select id="mlq-priority-rule" onchange="updateMlqSettings('priorityRule', this.value)"><option value="lower" selected>Lower number = higher priority</option><option value="higher">Higher number = higher priority</option></select>
+                        <label for="mlq-preempt-lower">Preemptive lower-priority queues</label>
+                        <select id="mlq-preempt-lower" onchange="updateMlqSettings('preemptLower', this.value === 'true')"><option value="true" selected>On</option><option value="false">Off</option></select>
+                    </div>
+                    <div id="mlq-config-grid" class="mlfq-config-grid"></div>
+                </div>
+                <p id="mlq-queue-notice" class="mlfq-config-note" role="status" aria-live="polite"></p>
+            </section>
+
+            <section id="mlfq-config" class="mlfq-config hidden" aria-label="MLFQ queue configuration">
+                <h3 class="silk-font">MLFQ QUEUE CONFIGURATION</h3>
+                <label for="mlfq-queue-count">Number of queues</label>
+                <select id="mlfq-queue-count" onchange="setMlfqQueueCount(this.value)">
+                    <option value="2">2 queues</option><option value="3" selected>3 queues</option><option value="4">4 queues</option><option value="5">5 queues</option><option value="6">6 queues</option><option value="7">7 queues</option><option value="8">8 queues</option>
+                </select>
+                <div id="mlfq-config-grid" class="mlfq-config-grid"></div>
+                <p class="mlfq-config-note">Quantum is used by RR; the duration also sets the threshold for the configured-duration demotion rule. The lowest queue cannot demote further.</p>
+                <p id="mlfq-queue-notice" class="mlfq-config-note" role="status" aria-live="polite"></p>
+            </section>
+
+            <!-- Process Inventory Table -->
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr id="process-table-header"></tr>
+                    </thead>
+                    <tbody id="process-tbody"></tbody>
+                </table>
+            </div>
+
+            <div class="action-cta-row">
+                <button type="button" class="btn btn-green btn-lg" onclick="calculateWithTransition()">
+                    🍄 CALCULATE SCHEDULE & GANTT
+                </button>
+                <button type="button" class="btn btn-yellow btn-lg" onclick="toggleChampionship()">
+                    🏆 WORLD CHAMPIONSHIP
+                </button>
+            </div>
+
+            <div id="warp-banner" class="warp-transition hidden">
+                🟢 WARPING THROUGH STAGE...
+            </div>
+        </section>
+
+        <!-- Gantt Chart & Results -->
+        <section id="results-panel" class="mario-panel hidden">
+            <div class="panel-top">
+                <span class="stage-tag">RESULTS</span>
+                <h2 id="results-heading" class="silk-font">GANTT CHART & PERFORMANCE STATS</h2>
+            </div>
+
+            <div id="celebrate-banner" class="celebrate-banner"></div>
+
+            <div class="gantt-box">
+                <div id="gantt-track" class="gantt-track"></div>
+            </div>
+
+            <section id="mlfq-timelines" class="mlfq-timelines hidden" aria-label="MLFQ CPU and queue timelines">
+                <h3 class="mlfq-timelines-title">MLFQ CPU / QUEUE TIMELINES</h3>
+                <p class="mlfq-timelines-note">One shared time scale · hover or focus an execution block for details</p>
+                <div id="mlfq-timeline-rows"></div>
+            </section>
+
+            <div class="stats-grid" style="margin-bottom: 16px;">
+                <div class="stat-card">
+                    <span class="label">🍄 AVG TURNAROUND TIME</span>
+                    <div id="res-avg-tat" class="value">0.00</div>
+                </div>
+                <div class="stat-card">
+                    <span class="label">🪙 AVG WAITING TIME</span>
+                    <div id="res-avg-wt" class="value">0.00</div>
+                </div>
+                <div class="stat-card">
+                    <span class="label">❓ AVG RESPONSE TIME</span>
+                    <div id="res-avg-rt" class="value">0.00</div>
+                </div>
+                <div class="stat-card">
+                    <span class="label">⭐ UTILIZATION / THROUGHPUT</span>
+                    <div id="res-util-tp" class="value" style="font-size: 0.85rem;">0.0% • 0.00/t</div>
+                </div>
+            </div>
+
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>PROCESS</th>
+                            <th>AT</th>
+                            <th>BT</th>
+                            <th>CT</th>
+                            <th>TAT</th>
+                            <th>WT</th>
+                            <th>RT</th>
+                        </tr>
+                    </thead>
+                    <tbody id="metrics-tbody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- World Championship Comparison -->
+        <section id="championship-panel" class="mario-panel hidden">
+            <div class="panel-top">
+                <span class="stage-tag">CHAMPIONSHIP</span>
+                <h2 class="silk-font">ALL 8 ALGORITHMS COMPARISON</h2>
+                <button type="button" class="btn btn-red" onclick="toggleChampionship(false)">CLOSE</button>
+            </div>
+
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>RANK</th>
+                            <th>ALGORITHM & STAGE</th>
+                            <th>AVG WT</th>
+                            <th>AVG TAT</th>
+                            <th>AVG RT</th>
+                            <th>CPU UTIL & THROUGHPUT</th>
+                            <th>EFFICIENCY BAR</th>
+                        </tr>
+                    </thead>
+                    <tbody id="championship-tbody"></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
